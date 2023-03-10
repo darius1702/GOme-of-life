@@ -32,7 +32,7 @@ func (bd *BoardDrawer) Run() {
     // bd.handleClick(win)
     win.Clear(colornames.Skyblue)
     mainWindow := Rect{TL: pixel.V(0, bd.Height), BR: pixel.V(bd.Width, 0)}
-    top, bottom := mainWindow.Split(DIR_HORIZONTAL)
+    top, bottom := mainWindow.Split(DIR_HORIZONTAL, 0.7)
     bd.drawBoardToRect(win, top)
 
     imd := imdraw.New(nil)

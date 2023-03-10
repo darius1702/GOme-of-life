@@ -49,7 +49,7 @@ type Split interface {
   Split(dir Direction)
 }
 
-func (r *Rect) Split(dir Direction) (*Rect, *Rect) {
+func (r *Rect) Split(dir Direction, ratio float64) (*Rect, *Rect) {
   var first, second *Rect
   switch dir {
   case DIR_HORIZONTAL:
@@ -59,12 +59,16 @@ func (r *Rect) Split(dir Direction) (*Rect, *Rect) {
     //  |     bottom    |
     //  +---------------BR
     height := r.TL.Y - r.BR.Y
+
+    // top
     first = NewRect(
       r.TL,
-      pixel.V(r.BR.X, r.TL.Y-height/2),
+      pixel.V(r.BR.X, r.TL.Y-height*ratio),
     )
+
+    // bottom
     second = NewRect(
-      pixel.V(r.TL.X, r.TL.Y-height/2),
+      pixel.V(r.TL.X, r.TL.Y-height*ratio),
       r.BR,
     )
 
@@ -77,12 +81,16 @@ func (r *Rect) Split(dir Direction) (*Rect, *Rect) {
     //  |       |   t   |
     //  +-------+-------BR
     width := r.BR.X - r.TL.X
+
+    // left
     first = NewRect(
       r.TL,
-      pixel.V(r.TL.X+width/2, r.BR.Y),
+      pixel.V(r.TL.X+width*ratio, r.BR.Y),
     )
+
+    // right
     second = NewRect(
-      pixel.V(r.TL.X+width/2, r.TL.Y),
+      pixel.V(r.TL.X+width*ratio, r.TL.Y),
       r.BR,
     )
   }
