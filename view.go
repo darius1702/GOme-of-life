@@ -14,6 +14,7 @@ type Rect struct {
   //  +---BR
   TL, BR        pixel.Vec
   Width, Height float64
+  Children      []*Rect
 }
 
 func NewRect(tl, br pixel.Vec) *Rect {
@@ -37,17 +38,19 @@ func (r *Rect) getScalingFactor(other *Rect) float64 {
   return scale
 }
 
+func (r *Rect) contains(x, y float64) bool {
+  return x >= r.TL.X &&
+    x <= r.BR.X &&
+    y <= r.TL.Y &&
+    y >= r.BR.Y
+}
+
 type Direction int
 
 const (
   DIR_HORIZONTAL Direction = iota
   DIR_VERTICAL
 )
-
-type Split interface {
-  Draw(win *pixelgl.Window)
-  Split(dir Direction)
-}
 
 func (r *Rect) Split(dir Direction, ratio float64) (*Rect, *Rect) {
   var first, second *Rect
@@ -94,7 +97,20 @@ func (r *Rect) Split(dir Direction, ratio float64) (*Rect, *Rect) {
       r.BR,
     )
   }
+  r.Children = append(r.Children, first, second)
   return first, second
+}
+
+func GetRectAtPosition(r *Rect, v pixel.Vec) *Rect {
+  if r.Children == nil {
+    return r
+  }
+  for _, c := range r.Children {
+    if c.contains(v.X, v.Y) {
+      return GetRectAtPosition(c, v)
+    }
+  }
+  return nil
 }
 
 func (r *Rect) DrawFill(win *pixelgl.Window, imd *imdraw.IMDraw) {
