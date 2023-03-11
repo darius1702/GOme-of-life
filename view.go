@@ -4,8 +4,6 @@ import (
   "math"
 
   "github.com/faiface/pixel"
-  "github.com/faiface/pixel/imdraw"
-  "github.com/faiface/pixel/pixelgl"
 )
 
 type Rect struct {
@@ -15,6 +13,7 @@ type Rect struct {
   TL, BR        pixel.Vec
   Width, Height float64
   Children      []*Rect
+  OnClick       func(pixel.Vec)
 }
 
 func NewRect(tl, br pixel.Vec) *Rect {
@@ -28,7 +27,7 @@ func NewRect(tl, br pixel.Vec) *Rect {
 
 // Get factor by which to scale 'other' to make it fit into
 // this rectangle, preserving its aspect ratio
-// FIXME: Scaling is broken in some weird aspect ratios
+// TODO: When scaling to fit, add the scaled down rect as only child
 func (r *Rect) getScalingFactor(other *Rect) float64 {
   if other.Width <= r.Width && other.Height <= r.Height {
     return 1.0
@@ -111,10 +110,4 @@ func GetRectAtPosition(r *Rect, v pixel.Vec) *Rect {
     }
   }
   return nil
-}
-
-func (r *Rect) DrawFill(win *pixelgl.Window, imd *imdraw.IMDraw) {
-  imd.Push(r.TL, r.BR)
-  imd.Rectangle(0)
-  imd.Draw(win)
 }

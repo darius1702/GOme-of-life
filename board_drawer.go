@@ -29,8 +29,6 @@ func (bd *BoardDrawer) Run() {
   }
 
   for !win.Closed() {
-    // TODO: Implement click handling for splits
-    // bd.handleClick(win)
     win.Clear(colornames.Skyblue)
     mainWindow := Rect{TL: pixel.V(0, bd.Height), BR: pixel.V(bd.Width, 0)}
     top, bottom := mainWindow.Split(DIR_VERTICAL, 0.7)
@@ -38,11 +36,18 @@ func (bd *BoardDrawer) Run() {
 
     imd := imdraw.New(nil)
     imd.Color = colornames.Salmon
-    bottom.DrawFill(win, imd)
+    fillRect(win, imd, bottom)
 
+    top.OnClick = func(pos pixel.Vec) {
+      fmt.Println(pos.X, pos.Y)
+    }
+
+    // TODO: Update handleClick with new layout
+    // TODO: Make clicks scale properly when the window contains a scaled down child
     r := GetRectAtPosition(&mainWindow, win.MousePosition())
-    if r != nil {
-      fmt.Println(r)
+    if r != nil && r.OnClick != nil &&
+      win.JustPressed(pixelgl.MouseButtonLeft) {
+      r.OnClick(win.MousePosition())
     }
     win.Update()
     time.Sleep(1000 / FRAME_RATE * time.Millisecond)
@@ -87,7 +92,7 @@ func (bd *BoardDrawer) drawBoardToRect(win *pixelgl.Window, rect *Rect) {
   border := NewRect(pixel.V(0, bd.Height), pixel.V(bd.Width, 0))
   scale := rect.getScalingFactor(border)
 
-  // TODO: fix scaling
+  // TODO: Fix scaling for some unusual aspect ratios
   newScaleX := (bd.Width * scale) / float64(bd.Game.Board.Width)
   newScaleY := (bd.Height * scale) / float64(bd.Game.Board.Height)
 
@@ -108,5 +113,11 @@ func (bd *BoardDrawer) drawBoardToRect(win *pixelgl.Window, rect *Rect) {
     }
   }
 
+  imd.Draw(win)
+}
+
+func fillRect(win *pixelgl.Window, imd *imdraw.IMDraw, r *Rect) {
+  imd.Push(r.TL, r.BR)
+  imd.Rectangle(0)
   imd.Draw(win)
 }
